@@ -44,11 +44,6 @@ class StockSubscriberActor(implicit context: ActorContext[StockSubscriberActor.M
 
   implicit val system: ActorSystem[_] = context.system
 
-//  private val (hubSink, hubSource) = MergeHub.source[Response](perProducerBufferSize = 16)
-//    .toMat(BroadcastHub.sink(bufferSize = 256))(Keep.both)
-//    .run()
-
-
   private val subscriptions: mutable.Set[String] = mutable.HashSet.empty
   private val subscriptionStream: Source[Response, Cancellable] = Source.tick(0.seconds, 1.second, ())
     .flatMapConcat { _ =>
