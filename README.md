@@ -1,4 +1,4 @@
-# Stock checker
+# Live stocks
 Provides live stock prices from Yahoo Finance API
 
 ## Architecture Diagram
