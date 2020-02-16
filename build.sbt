@@ -29,7 +29,7 @@ lazy val frontend = (project in file("frontend"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)
   .settings(
-    name := "react-scala-test",
+    name := "frontend",
     scalaVersion := "2.13.1",
 
     npmDependencies in Compile += "react" -> "16.8.6",
