@@ -1,7 +1,7 @@
 package controllers
 
 import actors.{StockSubscriberActor, SubscriberParent}
-import actors.StockSubscriberActor._
+import livestocks.models.StockSubscriber._
 import akka.actor.ActorSystem
 import akka.actor.typed.{ActorRef, Scheduler}
 import akka.stream.Materializer

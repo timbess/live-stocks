@@ -1,4 +1,5 @@
 import play.core.PlayVersion.akkaVersion
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
@@ -23,18 +24,46 @@ lazy val root = (project in file("."))
       "-deprecation",
       "-Xfatal-warnings"
     )
+  ).dependsOn(models.jvm)
+
+lazy val models = crossProject(JSPlatform, JVMPlatform).in(file("models"))
+  .settings(
+    name := "live-stocks-models",
+    version := "1.0-SNAPSHOT",
+    scalaVersion := "2.13.1",
+    scalacOptions ++= Seq(
+      "-feature",
+      "-deprecation",
+      "-Xfatal-warnings"
+    )
   )
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %%% "play-json" % "2.8.1",
+      "org.julienrf" %%% "play-json-derived-codecs" % "7.0.0",
+    ),
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-json" % "2.8.1",
+      "org.julienrf" %% "play-json-derived-codecs" % "7.0.0",
+    ),
+  )
+
+lazy val modelsJvm = models.jvm
+lazy val modelsJs = models.js
 
 lazy val frontend = (project in file("frontend"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)
   .settings(
-    name := "frontend",
+    name := "react-scala-test",
     scalaVersion := "2.13.1",
 
     npmDependencies in Compile += "react" -> "16.8.6",
     npmDependencies in Compile += "react-dom" -> "16.8.6",
     npmDependencies in Compile += "react-proxy" -> "1.1.8",
+//    npmDependencies in Compile += "nivo" -> "0.31.0",
 
     npmDevDependencies in Compile += "file-loader" -> "3.0.1",
     npmDevDependencies in Compile += "style-loader" -> "0.23.1",
@@ -45,14 +74,18 @@ lazy val frontend = (project in file("frontend"))
 
     libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.6.3",
     libraryDependencies += "me.shadaj" %%% "slinky-hot" % "0.6.3",
+    libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.8.1",
+    //    libraryDependencies += "me.shadaj" %%% "slinky-scalajsreact-interop" % "0.6.3",
 
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.0" % Test,
 
     scalacOptions += "-P:scalajs:sjsDefinedByDefault",
     scalacOptions += "-Ymacro-annotations",
+//    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
 
     version in webpack := "4.41.6",
     version in startWebpackDevServer := "3.10.3",
+//    version in webpack := "4.29.6",
 
     webpackResources := baseDirectory.value / "webpack" * "*",
 
@@ -68,4 +101,4 @@ lazy val frontend = (project in file("frontend"))
 
     addCommandAlias("frontendDev", ";frontend/fastOptJS::startWebpackDevServer;~frontend/fastOptJS"),
     addCommandAlias("frontendBuild", "frontend/fullOptJS::webpack"),
-  )
+  ).dependsOn(models.js)

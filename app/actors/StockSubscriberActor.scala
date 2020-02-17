@@ -8,6 +8,7 @@ import akka.{Done, NotUsed}
 import julienrf.json.derived
 import play.api.libs.json.Format
 import yahoofinance.YahooFinance
+import livestocks.models.StockSubscriber._
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -15,24 +16,11 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 object StockSubscriberActor {
-  sealed trait Command
-  object Command {
-    implicit val commandsFormatter: Format[Command] = derived.oformat()
-    case class AddSubscription(symbol: String) extends Command
-  }
-
   sealed trait Message
   object Message {
     case class InitializeStream(replyTo: ActorRef[Flow[Command, Response, NotUsed]]) extends Message
     case class ClientCommand(command: Command) extends Message
   }
-
-  sealed trait Response
-  object Response {
-    implicit val queriesFormatter: Format[Response] = derived.oformat()
-    case class StockPrice(symbol: String, price: BigDecimal) extends Response
-  }
-
 
   def apply(): Behavior[Message] = Behaviors.setup(implicit context =>
     new StockSubscriberActor().behavior
@@ -49,7 +37,7 @@ class StockSubscriberActor(implicit context: ActorContext[StockSubscriberActor.M
     .flatMapConcat { _ =>
       if (subscriptions.nonEmpty) {
         val results = YahooFinance.get(subscriptions.toArray)
-        Source(results.asScala.view.mapValues(_.getQuote.getPrice).map { case (k, v) => Response.StockPrice(k, v) }.toList)
+        Source(results.asScala.view.mapValues(_.getQuote.getPrice).filter(_._2 != null).map { case (k, v) => Response.StockPrice(k, v) }.toList)
       } else Source.empty
     }
 
