@@ -50,9 +50,6 @@ lazy val models = crossProject(JSPlatform, JVMPlatform).in(file("models"))
     ),
   )
 
-lazy val modelsJvm = models.jvm
-lazy val modelsJs = models.js
-
 lazy val frontend = (project in file("frontend"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)

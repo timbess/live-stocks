@@ -5,7 +5,7 @@ import slinky.core.annotations.react
 import slinky.web.html._
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSImport, ScalaJSDefined}
+import scala.scalajs.js.annotation.JSImport
 
 @JSImport("resources/App.css", JSImport.Default)
 @js.native
@@ -15,6 +15,10 @@ object AppCSS extends js.Object
 @js.native
 object ReactLogo extends js.Object
 
+@JSImport("resources/foo.js", JSImport.Default)
+@js.native
+object TestFoo extends js.Object
+
 @react class App extends StatelessComponent {
   type Props = Unit
 
@@ -22,13 +26,8 @@ object ReactLogo extends js.Object
 
   def render() = {
     div(className := "App")(
-      header(className := "App-header")(
-        img(src := ReactLogo.asInstanceOf[String], className := "App-logo", alt := "logo"),
-        h1(className := "App-title")("Welcome to React (with Scala.js!)")
-      ),
-      p(className := "App-intro")(
-        "To get started, edit ", code("App.scala"), " and save to reload."
-      )
+      br(),
+      StockTracker(wsUrl = "ws://localhost:9000/ws")
     )
   }
 }
