@@ -9,6 +9,7 @@ object StockSubscriber {
   object Command {
     implicit val commandsFormatter: Format[Command] = derived.oformat()
     case class AddSubscription(symbol: String) extends Command
+    case class RemoveSubscription(symbol: String) extends Command
   }
 
   sealed trait Response

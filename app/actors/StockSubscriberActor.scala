@@ -5,10 +5,8 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.stream.scaladsl._
 import akka.{Done, NotUsed}
-import julienrf.json.derived
-import play.api.libs.json.Format
-import yahoofinance.YahooFinance
 import livestocks.models.StockSubscriber._
+import yahoofinance.YahooFinance
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -44,6 +42,8 @@ class StockSubscriberActor(implicit context: ActorContext[StockSubscriberActor.M
   private val inputCommands: Sink[Command, Future[Done]] = Sink.foreach[Command] {
     case Command.AddSubscription(symbol) =>
       addSubscription(symbol)
+    case Command.RemoveSubscription(symbol) =>
+      removeSubscription(symbol)
   }
 
   private lazy val websocketFlow: Flow[Command, Response, NotUsed] =
@@ -56,9 +56,18 @@ class StockSubscriberActor(implicit context: ActorContext[StockSubscriberActor.M
     case Message.ClientCommand(Command.AddSubscription(symbol)) =>
       addSubscription(symbol)
       Behaviors.same
+    case Message.ClientCommand(Command.RemoveSubscription(symbol)) =>
+      removeSubscription(symbol)
+      Behaviors.same
   }
 
   private def addSubscription(symbol: String) = {
+    context.log.info(s"Adding symbol: $symbol")
     subscriptions += symbol
+  }
+
+  private def removeSubscription(symbol: String) = {
+    context.log.info(s"Removing symbol: $symbol")
+    subscriptions -= symbol
   }
 }

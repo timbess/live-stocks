@@ -11,10 +11,12 @@ import livestocks.models.StockSubscriber
 import livestocks.models.StockSubscriber.Response
 import play.api.libs.json.Json
 
-import scala.collection.{SortedMap, SortedSet}
+import scala.collection.immutable.{SortedMap, SortedSet}
 
 @react class StockTracker extends Component {
+
   case class Props(wsUrl: String)
+
   case class State(symbols: SortedMap[String, BigDecimal], inputText: String, disabled: Boolean)
 
   val ws = new WebSocket(props.wsUrl)
@@ -24,7 +26,14 @@ import scala.collection.{SortedMap, SortedSet}
     ws.onmessage = e => {
       Json.parse(e.data.asInstanceOf[String]).as[StockSubscriber.Response] match {
         case Response.StockPrice(symbol, price) =>
-          setState(state.copy(symbols = state.symbols ++ SortedMap(symbol -> price)))
+          setState(
+            state.copy(symbols =
+              if (state.symbols.contains(symbol)) {
+                state.symbols.updated(symbol, price)
+              } else {
+                state.symbols
+              })
+          )
       }
     }
   }
@@ -39,16 +48,21 @@ import scala.collection.{SortedMap, SortedSet}
   def handleSubmit(e: SyntheticEvent[html.Form, Event]): Unit = {
     e.preventDefault()
     ws.send(Json.toJson(StockSubscriber.Command.AddSubscription(state.inputText): StockSubscriber.Command).toString())
-    setState(state.copy(symbols = state.symbols ++ SortedMap(state.inputText -> 0)))
+    setState(state.copy(symbols = state.symbols.updated(state.inputText, 0), inputText = ""))
+  }
+
+  def removeSymbol(symbol: String): Unit = {
+    ws.send(Json.toJson(StockSubscriber.Command.RemoveSubscription(symbol): StockSubscriber.Command).toString())
+    setState(state.copy(symbols = state.symbols.removed(symbol)))
   }
 
   override def render(): ReactElement = {
     div(
-      state.symbols.zipWithIndex.map { case ((symbol, price), idx) => Stock(symbol = symbol, currentPrice = price).withKey(idx.toString) },
+      state.symbols.zipWithIndex.map { case ((symbol, price), idx) => Stock(symbol = symbol, currentPrice = price, handleRemove = removeSymbol).withKey(idx.toString) },
       form(onSubmit := (handleSubmit(_)))(
         input(onChange := (handleChange(_)),
-              disabled := state.disabled,
-              value := state.inputText),
+          disabled := state.disabled,
+          value := state.inputText),
         button("Add Stock")
       )
     )
