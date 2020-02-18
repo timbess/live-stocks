@@ -3,9 +3,18 @@ Provides live stock prices from Yahoo Finance API
 
 ## Local Setup
 
+### Backend
+1. Run `sbt run` to start API
+
+### React Frontend
+1. Install Yarn
+2. Go to `react-frontend` directory
+2. Run `yarn install && yarn start` to start UI
+
+### Slinky Frontend
 1. Install Yarn
 2. Run `sbt frontendDev` to start UI
-2. Run `sbt run` to start API
+
 
 ## Architecture Diagram
 

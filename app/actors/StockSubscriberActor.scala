@@ -31,7 +31,7 @@ class StockSubscriberActor(implicit context: ActorContext[StockSubscriberActor.M
   implicit val system: ActorSystem[_] = context.system
 
   private val subscriptions: mutable.Set[String] = mutable.HashSet.empty
-  private val subscriptionStream: Source[Response, Cancellable] = Source.tick(0.seconds, 1.second, ())
+  private val subscriptionStream: Source[Response, Cancellable] = Source.tick(0.seconds, 500.millis, ())
     .flatMapConcat { _ =>
       if (subscriptions.nonEmpty) {
         val results = YahooFinance.get(subscriptions.toArray)
